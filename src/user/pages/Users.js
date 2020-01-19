@@ -1,16 +1,50 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import UsersList from '../components/UsersList';
+import ErrorModal from '../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 
 const Users = () => {
-  const USERS = [
-    {
-      id: 'u1',
-      name: 'Tim Vo',
-      image: 'https://res.cloudinary.com/ddj5orpun/image/upload/v1569892155/samples/landscapes/beach-boat.jpg',
-      skillsCompleted: 0 //link number of skills learnt from DUMMY
-    }
-  ];
-  return <UsersList items={USERS} />;
+  const [isLoading, setIsLoading] = useState (false);
+  const [error, setError] = useState ();
+  const [loadedUsers, setLoadedUsers] = useState ();
+
+  useEffect (() => {
+    const sendRequest = async () => {
+      //iiffe
+      setIsLoading (true);
+      try {
+        const response = await fetch ('http://localhost:5000/api/users');
+        const responseData = await response.json ();
+        if (!response.ok) {
+          throw new Error (responseData.message);
+        }
+
+        setLoadedUsers (responseData.users);
+      } catch (err) {
+        setError (err.message);
+      }
+      setIsLoading (false);
+    };
+    sendRequest ();
+  }, []);
+  //useEffect empty array bracket makes it so it runs only onece
+  //default req type for fetch is GET
+  //useEffect does not like async code, use in iife instead
+
+  const errorHandler = () => {
+    setError (null);
+  };
+
+  return (
+    <React.Fragment>
+      <ErrorModal error={error} onClear={errorHandler} />
+      {isLoading &&
+        <div className="center">
+          <LoadingSpinner />
+        </div>}
+      {!isLoading && loadedUsers && <UsersList items={loadedUsers} />}
+    </React.Fragment>
+  );
 };
 
 export default Users;

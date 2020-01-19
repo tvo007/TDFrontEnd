@@ -2,18 +2,22 @@ import React, {useState, useContext} from 'react';
 import Card from '../../shared/components/UIElements/Card';
 import Input from '../../shared/components/FormElements/Input';
 import Button from '../../shared/components/FormElements/Button';
+import ErrorModal from '../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 import {
   VALIDATOR_EMAIL,
   VALIDATOR_MINLENGTH,
-  VALIDATOR_REQUIRE
+  VALIDATOR_REQUIRE,
 } from '../../shared/util/validators';
 import {useForm} from '../../shared/hooks/form-hooks';
-import {AuthContext} from '../../shared/context/auth-context'
+import {useHttpClient} from '../../shared/hooks/http-hook';
+import {AuthContext} from '../../shared/context/auth-context';
 import './Auth.css';
 
 const Auth = () => {
-  const auth = useContext(AuthContext)
+  const auth = useContext (AuthContext);
   const [isLoginMode, setIsLoginMode] = useState (true);
+  const {isLoading, error, sendRequest, clearError} = useHttpClient ();
   const [formState, inputHandler, setFormData] = useForm (
     {
       email: {
@@ -31,67 +35,112 @@ const Auth = () => {
 
   const switchModeHandler = () => {
     if (!isLoginMode) {
-        setFormData({
-            ...formState.inputs,
-            name: undefined
-        }, formState.inputs.email.isValid && formState.inputs.password.isValid)
+      setFormData (
+        {
+          ...formState.inputs,
+          name: undefined,
+        },
+        formState.inputs.email.isValid && formState.inputs.password.isValid
+      );
     } else {
-        setFormData({
-            ...formState.inputs,
-            name: {
-                value: '',
-                isValid: false
-            }
-        }, false)
+      setFormData (
+        {
+          ...formState.inputs,
+          name: {
+            value: '',
+            isValid: false,
+          },
+        },
+        false
+      );
     }
-    setIsLoginMode(prevMode => !prevMode);
+    setIsLoginMode (prevMode => !prevMode);
   };
-  const authSubmitHandler = event => {
+
+  //problem here??
+
+  const authSubmitHandler = async event => {
     event.preventDefault ();
-    console.log (formState.inputs);
-    auth.login();
+
+    if (isLoginMode) {
+      try {
+        await sendRequest (
+          'http://localhost:5000/api/users/login',
+          'POST',
+          JSON.stringify ({
+            email: formState.inputs.email.value,
+            password: formState.inputs.password.value,
+          }),
+          {
+            'Content-type': 'application/json',
+          }
+        );
+        auth.login ();
+      } catch (err) {}
+    } else {
+      try {
+        await sendRequest (
+          'http://localhost:5000/api/users/signup',
+          'POST',
+          JSON.stringify ({
+            name: formState.inputs.name.value,
+            email: formState.inputs.email.value,
+            password: formState.inputs.password.value,
+          }),
+          {
+            'Content-type': 'application/json',
+          }
+        );
+        auth.login ();
+      } catch (err) {}
+    }
   };
+
   return (
-    <Card className="authentication">
-      <h2>Login Required</h2>
-      <hr />
-      <form onSubmit={authSubmitHandler}>
-        {!isLoginMode &&
+    <React.Fragment>
+      <ErrorModal error={error} onClear={clearError} />
+      <Card className="authentication">
+        {isLoading && <LoadingSpinner asOverlay />}
+        <h2>Login Required</h2>
+        <hr />
+        <form onSubmit={authSubmitHandler}>
+          {!isLoginMode &&
+            <Input
+              element="input"
+              id="name"
+              type="text"
+              label="Name"
+              validators={[VALIDATOR_REQUIRE]}
+              errorText="Please enter a name."
+              onInput={inputHandler}
+            />}
           <Input
             element="input"
-            id="name"
-            type="text"
-            label="Name"
-            validators={[VALIDATOR_REQUIRE]}
-            errorText = 'Please enter a name.'
+            id="email"
+            type="email"
+            label="E-mail"
+            validators={[VALIDATOR_EMAIL ()]}
+            errorText="Please enter a valid email address."
             onInput={inputHandler}
-          />}
-        <Input
-          element="input"
-          id="email"
-          type="email"
-          label="E-mail"
-          validators={[VALIDATOR_EMAIL ()]}
-          errorText="Please enter a valid email address."
-          onInput={inputHandler}
-        />
-        <Input
-          element="input"
-          id="password"
-          type="password"
-          label="Password"
-          validators={[VALIDATOR_MINLENGTH (5)]}
-          errorText="Please enter a valid email password."
-          onInput={inputHandler}
-        />
-        <Button type="submit" disabled={!formState.isValid}>
-          {isLoginMode ? 'LOGIN' : 'SIGNUP'}
+          />
+          <Input
+            element="input"
+            id="password"
+            type="password"
+            label="Password"
+            validators={[VALIDATOR_MINLENGTH (5)]}
+            errorText="Please enter a valid email password."
+            onInput={inputHandler}
+          />
+          <Button type="submit" disabled={!formState.isValid}>
+            {isLoginMode ? 'LOGIN' : 'SIGNUP'}
+          </Button>
+        </form>
+        <Button inverse onClick={switchModeHandler}>
+          SWITCH TO {isLoginMode ? 'SIGN UP' : 'LOGIN'}
         </Button>
-      </form>
-      <Button inverse onClick={switchModeHandler}>
-        SWITCH TO {isLoginMode ? 'SIGN UP' : 'LOGIN'}
-      </Button>
-    </Card>
+      </Card>
+    </React.Fragment>
   );
 };
 

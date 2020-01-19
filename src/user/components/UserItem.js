@@ -15,7 +15,7 @@ const UserItem = props => {
           </div>
           <div className="user-item__info">
             <h2>{props.name}</h2>
-            <h3>Skills Mastered: {props.skills}</h3>
+            <h3>Lessons Mastered: {props.skills}</h3>
           </div>
         </Link>
       </Card>

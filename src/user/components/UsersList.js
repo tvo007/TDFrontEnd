@@ -23,7 +23,7 @@ const UsersList = props => {
           id={user.id}
           image={user.image}
           name={user.name}
-          skills={user.skillsCompleted}
+          skills={user.lessons.length}
         />
       ))}
     </ul>
@@ -31,3 +31,5 @@ const UsersList = props => {
 };
 
 export default UsersList;
+
+//look into user.skillsCompleted and make it display number of lessons learned??
