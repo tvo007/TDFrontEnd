@@ -9,7 +9,6 @@ import { useForm } from '../../shared/hooks/form-hooks'
 import './NewNotes.css';
 
 
-
 const NewNotes = () => {
   const [formState, inputHandler] = useForm({
     title: {
@@ -60,3 +59,5 @@ export default NewNotes;
 
 //todo: basic new lesson functionality
 //adds a title for now???
+
+//converting new lesson functionality
