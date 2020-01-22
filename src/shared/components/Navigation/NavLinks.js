@@ -11,11 +11,11 @@ const NavLinks = () => {
       </li>
       {auth.isLoggedIn &&
         <li>
-          <NavLink to="/u1/lessons">MY LESSONS</NavLink>
+          <NavLink to={`/${auth.userId}/lessons`}>MY LESSONS</NavLink>
         </li>}
       {auth.isLoggedIn &&
         <li>
-          <NavLink to="/lessons/new">ADD NOTES</NavLink>
+          <NavLink to="/lessons/new">ADD LESSON</NavLink>
         </li>}
       {!auth.isLoggedIn &&
         <li>

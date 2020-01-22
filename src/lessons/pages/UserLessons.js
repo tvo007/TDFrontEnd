@@ -1,8 +1,51 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import LessonPlan from '../components/LessonPlan';
-// import { useParams } from 'react-router-dom'
+import {useParams} from 'react-router-dom';
+import ErrorModal from '../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
+import {useHttpClient} from '../../shared/hooks/http-hook';
 
-const DUMMY_LESSONS = [
+const UserLessons = () => {
+  const [loadedLessons, setLoadedLessons] = useState ();
+  const {isLoading, error, sendRequest, clearError} = useHttpClient ();
+
+  const userId = useParams ().userId;
+
+  useEffect (
+    () => {
+      const fetchLessons = async () => {
+        try {
+          const responseData = await sendRequest (
+            `http://localhost:5000/api/lessons/user/${userId}`
+          );
+          setLoadedLessons (responseData.lessons);
+        } catch (err) {}
+      };
+      fetchLessons ();
+    },
+    [sendRequest, userId]
+  );
+
+  // const loadedLessons = DUMMY_LESSONS.filter(lesson => lesson.creator === userId);
+  return (
+    <React.Fragment>
+      <ErrorModal error={error} onClear={clearError}/>
+      {isLoading && (
+        <div className='center'>
+          <LoadingSpinner />
+        </div>
+      )}
+      {!isLoading && loadedLessons && <LessonPlan items={loadedLessons} />}
+    </React.Fragment>
+  );
+};
+
+export default UserLessons;
+
+//todo: fill out dummy data
+
+/**
+ * const DUMMY_LESSONS = [
   {
     lessonPlanOne: {
       lessonName: 'Blue 1',
@@ -86,12 +129,5 @@ const DUMMY_LESSONS = [
   
 ];
 
-const UserLessons = () => {
-  // const userId = useParams().userId;
-  // const loadedLessons = DUMMY_LESSONS.filter(lesson => lesson.creator === userId);
-  return <LessonPlan items={DUMMY_LESSONS} />;
-};
-
-export default UserLessons;
-
-//todo: fill out dummy data 
+blue 1 lesson structure
+ */
