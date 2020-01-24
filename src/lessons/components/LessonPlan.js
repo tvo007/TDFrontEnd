@@ -25,6 +25,7 @@ const LessonPlan = props => {
           title={lesson.title}
           description={lesson.description}
           creatorId={lesson.creator}
+          onDelete = {props.onDeleteLesson}
         />
       ))}
 

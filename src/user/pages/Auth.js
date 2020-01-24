@@ -128,8 +128,8 @@ const Auth = () => {
             id="password"
             type="password"
             label="Password"
-            validators={[VALIDATOR_MINLENGTH (5)]}
-            errorText="Please enter a valid email password."
+            validators={[VALIDATOR_MINLENGTH (6)]}
+            errorText="Please enter a valid password."
             onInput={inputHandler}
           />
           <Button type="submit" disabled={!formState.isValid}>

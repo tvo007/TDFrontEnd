@@ -2,8 +2,13 @@ import React, {useState, useContext} from 'react';
 import Card from '../../shared/components/UIElements/Card';
 import Button from '../../shared/components/FormElements/Button';
 import Modal from '../../shared/components/UIElements/Modal';
+import ErrorModal from '../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 import {AuthContext} from '../../shared/context/auth-context';
+import {useHttpClient} from '../../shared/hooks/http-hook';
+
 import './LessonItem.css';
+
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faCheck} from '@fortawesome/free-solid-svg-icons';
 
@@ -21,7 +26,8 @@ import {faCheck} from '@fortawesome/free-solid-svg-icons';
 //   return skill.right ? checkMark : 'X';
 // };
 
-const LessonItem = ({id, title, description, creatorId}) => {
+const LessonItem = ({id, title, description, creatorId, onDelete}) => {
+  const {isLoading, error, sendRequest, clearError} = useHttpClient ();
   const auth = useContext (AuthContext);
   const [showLesson, setShowLesson] = useState (false);
   const [showConfirmModal, setShowConfirmModal] = useState (false);
@@ -38,13 +44,17 @@ const LessonItem = ({id, title, description, creatorId}) => {
     setShowConfirmModal (false);
   };
 
-  const confirmDeleteHandler = () => {
+  const confirmDeleteHandler = async () => {
     setShowConfirmModal (false);
-    console.log ('DELETING...');
+    try {
+      await sendRequest (`http://localhost:5000/api/lessons/${id}`, 'DELETE');
+      onDelete (id);
+    } catch (err) {}
   };
 
   return (
     <React.Fragment>
+      <ErrorModal error={error} onClear={clearError} />
       <Modal
         show={showLesson}
         onCancel={closeLessonHandler}
@@ -73,15 +83,16 @@ const LessonItem = ({id, title, description, creatorId}) => {
       </Modal>
       <li className="lesson-item">
         <Card className="lesson-item__content">
+          {isLoading && <LoadingSpinner asOverlay />}
           <div className="lesson-item__info" />
           <h2>PLACEHOLDER</h2>
           <h2>{title}</h2>
           <h2>{description}</h2>
           <div className="lesson-item__actions">
             <Button inverse onClick={openLessonHandler}>View Lesson</Button>
-            {auth.isLoggedIn &&
+            {auth.userId === creatorId &&
               <Button to={`/lessons/${id}`}>Edit Lesson</Button>}
-            {auth.isLoggedIn &&
+            {auth.userId === creatorId &&
               <Button danger onClick={showDeleteWarningHandler}>
                 Delete Lesson
               </Button>}

@@ -19,14 +19,13 @@ const NavLinks = () => {
         </li>}
       {!auth.isLoggedIn &&
         <li>
-          <NavLink to="/auth">AUTHENTICATE</NavLink>
+          <NavLink to="/auth">LOGIN</NavLink>
         </li>}
-      {auth.isLoggedIn && (
+      {auth.isLoggedIn &&
         <li>
           <button onClick={auth.logout}>LOGOUT</button>
-        </li>
-      )}
-      
+        </li>}
+
     </ul>
   );
 };

@@ -27,15 +27,25 @@ const UserLessons = () => {
   );
 
   // const loadedLessons = DUMMY_LESSONS.filter(lesson => lesson.creator === userId);
+  const lessonDeletedHandler = deletedLessonId => {
+    setLoadedLessons (prevLessons =>
+      prevLessons.filter (lesson => lesson.id !== deletedLessonId)
+    );
+  };
+
   return (
     <React.Fragment>
-      <ErrorModal error={error} onClear={clearError}/>
-      {isLoading && (
-        <div className='center'>
+      <ErrorModal error={error} onClear={clearError} />
+      {isLoading &&
+        <div className="center">
           <LoadingSpinner />
-        </div>
-      )}
-      {!isLoading && loadedLessons && <LessonPlan items={loadedLessons} />}
+        </div>}
+      {!isLoading &&
+        loadedLessons &&
+        <LessonPlan
+          items={loadedLessons}
+          onDeleteLesson={lessonDeletedHandler}
+        />}
     </React.Fragment>
   );
 };
